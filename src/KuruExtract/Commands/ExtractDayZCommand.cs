@@ -288,7 +288,7 @@ internal static class ExtractDayZCommand
                     {
                         File.Delete(file);
                     }
-                    catch (IOException ex)
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                     {
                         cleanupError = $"Could not delete [grey]{file}[/]: {ex.Message}";
                         return;
@@ -301,7 +301,10 @@ internal static class ExtractDayZCommand
 
                 // remove subdirectories left empty within prefix directories
                 foreach (var prefixDir in prefixDirs)
-                    DeleteEmptyDirectories(prefixDir);
+                {
+                    if (!DeleteEmptyDirectories(prefixDir, out cleanupError))
+                        return;
+                }
 
                 var parallelism = parallel > 1 ? parallel : Environment.ProcessorCount;
 
@@ -349,13 +352,29 @@ internal static class ExtractDayZCommand
         return 0;
     }
 
-    private static void DeleteEmptyDirectories(string path)
+    private static bool DeleteEmptyDirectories(string path, out string? error)
     {
         foreach (var dir in Directory.EnumerateDirectories(path))
-            DeleteEmptyDirectories(dir);
+        {
+            if (!DeleteEmptyDirectories(dir, out error))
+                return false;
+        }
 
         if (!Directory.EnumerateFileSystemEntries(path).Any())
-            Directory.Delete(path);
+        {
+            try
+            {
+                Directory.Delete(path);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                error = $"Could not delete [grey]{path}[/]: {ex.Message}";
+                return false;
+            }
+        }
+
+        error = null;
+        return true;
     }
 
     private static bool IsScriptsPBO(PBO pbo) =>
