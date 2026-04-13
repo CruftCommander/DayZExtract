@@ -307,6 +307,7 @@ internal static class ExtractDayZCommand
                 }
 
                 var parallelism = parallel > 1 ? parallel : Environment.ProcessorCount;
+                var extractErrors = new ConcurrentBag<string>();
 
                 Partitioner.Create(pbos, EnumerablePartitionerOptions.NoBuffering)
                     .AsParallel()
@@ -316,9 +317,19 @@ internal static class ExtractDayZCommand
                     {
                         var label = pbo.IsOfficial ? pbo.FileName : $"{pbo.FileName} ({pbo.Prefix})";
                         var task = ctx.AddTask(label, maxValue: pbo.Files.Count);
-                        ExtractFiles(pbo, task, destination, flatScripts, cancellationToken);
-                        pbo.Dispose();
+                        try
+                        {
+                            if (!ExtractFiles(pbo, task, destination, flatScripts, out var error, cancellationToken))
+                                extractErrors.Add(error!);
+                        }
+                        finally
+                        {
+                            pbo.Dispose();
+                        }
                     });
+
+                if (!extractErrors.IsEmpty)
+                    cleanupError = string.Join('\n', extractErrors);
             });
         }
         catch (OperationCanceledException)
@@ -493,7 +504,7 @@ internal static class ExtractDayZCommand
         catch { return false; }
     }
 
-    private static void ExtractFiles(PBO pbo, ProgressTask task, string destination, bool flatScripts, CancellationToken cancellationToken = default)
+    private static bool ExtractFiles(PBO pbo, ProgressTask task, string destination, bool flatScripts, out string? error, CancellationToken cancellationToken = default)
     {
         var path = Path.Combine(destination, pbo.Prefix ?? string.Empty);
         var injectSubDir = !flatScripts && IsScriptsPBO(pbo) ? "DayZ" : null;
@@ -501,9 +512,21 @@ internal static class ExtractDayZCommand
         foreach (var file in CollectionsMarshal.AsSpan(pbo.Files))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            PBO.ExtractFile(file, path, injectSubDir);
+            try
+            {
+                PBO.ExtractFile(file, path, injectSubDir);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                error = $"Could not extract [grey]{file.FileName}[/] from [grey]{pbo.FileName}[/]: {ex.Message}";
+                task.StopTask();
+                return false;
+            }
             task.Increment(1);
         }
+
+        error = null;
+        return true;
     }
 
     private readonly record struct ExtensionStat(long Count, long Bytes);
