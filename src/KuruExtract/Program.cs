@@ -4,6 +4,7 @@ using Spectre.Console;
 using System.Text;
 using Velopack;
 using Velopack.Locators;
+using static ConsoleAppFramework.ConsoleApp;
 
 namespace KuruExtract;
 public class Program
@@ -12,6 +13,12 @@ public class Program
 
     public static int Main(string[] args)
     {
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+        {
+            AnsiConsole.MarkupLine("[red]FATAL ERROR:[/]");
+            Console.WriteLine((Exception)e.ExceptionObject);
+        };
+
         var app = VelopackApp.Build();
 
         if (OperatingSystem.IsWindows())
@@ -45,13 +52,7 @@ public class Program
 
         try
         {
-            ConsoleApp.Run(args, ExtractDayZCommand.Execute);
-        }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine($"[red]UNHANDLED EXCEPTION:[/] {Markup.Escape(ex.Message)}");
-            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(ex.StackTrace ?? string.Empty)}[/]");
-            Environment.ExitCode = 1;
+            Run(args, ExtractDayZCommand.Execute);
         }
         finally
         {
