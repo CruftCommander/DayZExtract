@@ -177,7 +177,7 @@ internal static class ExtractDayZCommand
             }
 
             var experimentalPaths = GamePath.Experimental;
-            if (promptExperimental && !experimental && experimentalPaths.Count > 0)
+            if (promptExperimental && !experimental && experimentalPaths.Count > 0 && unofficialDirs.Length == 0)
             {
                 experimental = AnsiConsole.ConfirmAsync("Extract experimental", false, cancellationToken)
                     .GetAwaiter().GetResult();
@@ -437,10 +437,13 @@ internal static class ExtractDayZCommand
 
     private static IEnumerable<PBO> GetPBOs(string root, string[] unofficialDirs, BiPublicKey dayZKey)
     {
-        foreach (var pboPath in EnumeratePboPaths(root))
+        if (unofficialDirs.Length == 0)
         {
-            if (IsSignedByKey(pboPath + ".dayz.bisign", dayZKey))
-                yield return new PBO(pboPath) { IsOfficial = true };
+            foreach (var pboPath in EnumeratePboPaths(root))
+            {
+                if (IsSignedByKey(pboPath + ".dayz.bisign", dayZKey))
+                    yield return new PBO(pboPath) { IsOfficial = true };
+            }
         }
 
         foreach (var entry in unofficialDirs)
