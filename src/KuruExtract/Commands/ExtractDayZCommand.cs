@@ -251,15 +251,10 @@ internal static class ExtractDayZCommand
                     }
                 }
 
-                // scope cleanup to unique root prefix directories (first path segment of each PBO prefix)
-                // so that stale files from reorganised or removed PBOs under the same root are also caught
+                // scope cleanup to each PBO's stated prefix so files from unrelated mods
+                // sharing a root prefix segment are left untouched
                 var prefixDirs = pbos
-                    .Select(pbo =>
-                    {
-                        var prefix = pbo.Prefix ?? string.Empty;
-                        var root = prefix.Split(['/', '\\'], 2, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? prefix;
-                        return Path.GetFullPath(Path.Combine(destination, root));
-                    })
+                    .Select(pbo => Path.GetFullPath(Path.Combine(destination, pbo.Prefix ?? string.Empty)))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .Where(Directory.Exists)
                     .ToList();
