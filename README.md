@@ -94,7 +94,7 @@ Install the `vpk` CLI tool:
 
 ```bash
 # pinned version, stable does not support MSI packages
-dotnet tool install -g vpk --version 0.0.1535-gb21da2a
+dotnet tool install -g vpk --version 0.0.1589-ga2c5a97
 ```
 
 Then publish and pack:

@@ -20,7 +20,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Spectre.Console" Version="0.55.1-alpha.0.8" />
-		<PackageReference Include="Velopack" Version="0.0.1535-gb21da2a" />
+		<PackageReference Include="Velopack" Version="0.0.1589-ga2c5a97" />
 	</ItemGroup>
 
 </Project>
