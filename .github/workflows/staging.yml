@@ -1,7 +1,13 @@
 name: Staging
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Pre-release label appended to the version (e.g. beta, alpha, rc1).
+        required: true
+        default: beta
+        type: string
 
 permissions:
   contents: write
@@ -16,16 +22,17 @@ jobs:
       - name: Install vpk
         run: dotnet tool install -g vpk --version 0.0.1589-ga2c5a97
 
-      - name: Get version
+      - name: Set release type
         id: version
         shell: pwsh
         run: |
-          [xml]$props = Get-Content Publish.props
+          $releaseType = '${{ inputs.release_type }}'
+          $path = (Resolve-Path Publish.props).Path
+          [xml]$props = Get-Content $path
           $pg = $props.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1
-          $version = $pg.Version
-          $releaseType = $pg.ReleaseType
-          $label = if ($releaseType) { $releaseType } else { "beta" }
-          echo "version=$version-$label" >> $env:GITHUB_OUTPUT
+          $pg.SelectSingleNode('ReleaseType').InnerText = $releaseType
+          $props.Save($path)
+          echo "version=$($pg.Version)-$releaseType" >> $env:GITHUB_OUTPUT
 
       - name: Publish
         run: dotnet publish -c Release -r win-x64
