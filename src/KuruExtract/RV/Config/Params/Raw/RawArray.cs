@@ -7,11 +7,6 @@ internal sealed class RawArray
 {
     public List<RawValue> Entries { get; }
 
-    public RawArray(IEnumerable<RawValue> values)
-    {
-        Entries = [.. values];
-    }
-
     public RawArray(RVBinaryReader input)
     {
         var nEntries = input.ReadCompactInteger();

@@ -31,15 +31,6 @@ internal sealed class ParamClass : ParamEntry
         return result;
     }
 
-    public ParamClass? GetClass(string name)
-    {
-        return Entries.OfType<ParamClass>().FirstOrDefault(c => c.Name == name);
-    }
-    public T[]? GetArray<T>(string name)
-    {
-        return Entries.OfType<ParamArray>().FirstOrDefault(c => c.Name == name)?.ToArray<T>();
-    }
-
     private void ReadCore(RVBinaryReader input)
     {
         BaseClassName = input.ReadAsciiz();

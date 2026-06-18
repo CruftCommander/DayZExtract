@@ -5,27 +5,6 @@ internal sealed class ParamValue : ParamEntry
 {
     public RawValue Value { get; }
 
-    public ParamValue(string name, bool value)
-    {
-        Name = name;
-        Value = new RawValue(value ? 1 : 0);
-    }
-    public ParamValue(string name, int value)
-    {
-        Name = name;
-        Value = new RawValue(value);
-    }
-    public ParamValue(string name, float value)
-    {
-        Name = name;
-        Value = new RawValue(value);
-    }
-    public ParamValue(string name, string value)
-    {
-        Name = name;
-        Value = new RawValue(value);
-    }
-
     public ParamValue(RVBinaryReader input)
     {
         var subtype = (ValueType)input.ReadByte();

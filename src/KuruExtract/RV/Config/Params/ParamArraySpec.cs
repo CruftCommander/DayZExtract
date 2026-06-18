@@ -16,20 +16,6 @@ internal sealed class ParamArraySpec : ParamEntry
         Array = new RawArray(input);
     }
 
-    public ParamArraySpec(string name, int flag, IEnumerable<RawValue> values)
-    {
-        Name = name;
-        Flag = flag;
-        Array = new RawArray(values);
-    }
-
-    public ParamArraySpec(string name, int flag, params RawValue[] values) : this(name, flag, (IEnumerable<RawValue>)values) { }
-
-    public T[] ToArray<T>()
-    {
-        return [.. Array.Entries.Select(e => e.Get<T>())];
-    }
-
     public override string ToString(int indentionLevel)
     {
         var ind = Indent(indentionLevel);

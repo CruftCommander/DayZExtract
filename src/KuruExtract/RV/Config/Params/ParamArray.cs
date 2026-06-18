@@ -13,19 +13,6 @@ internal sealed class ParamArray : ParamEntry
         Array = new RawArray(input);
     }
 
-    public ParamArray(string name, IEnumerable<RawValue> values)
-    {
-        Name = name;
-        Array = new RawArray(values);
-    }
-
-    public ParamArray(string name, params RawValue[] values) : this(name, (IEnumerable<RawValue>)values) { }
-
-    public T[] ToArray<T>()
-    {
-        return [.. Array.Entries.Select(e => e.Get<T>())];
-    }
-
     public override string ToString(int indentionLevel)
     {
         var ind = Indent(indentionLevel);

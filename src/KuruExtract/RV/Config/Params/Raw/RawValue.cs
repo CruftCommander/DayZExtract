@@ -19,30 +19,6 @@ internal sealed class RawValue
     private readonly RawArray? _array;
     private NumericUnion _numeric;
 
-    public RawValue(string v)
-    {
-        Type = ValueType.String;
-        _string = v;
-    }
-
-    public RawValue(int v)
-    {
-        Type = ValueType.Int;
-        _numeric.Int = v;
-    }
-
-    public RawValue(long v)
-    {
-        Type = ValueType.Int64;
-        _numeric.Int64 = v;
-    }
-
-    public RawValue(float v)
-    {
-        Type = ValueType.Float;
-        _numeric.Float = v;
-    }
-
     public RawValue(RVBinaryReader input) : this(input, (ValueType)input.ReadByte()) { }
 
     public RawValue(RVBinaryReader input, ValueType type)
@@ -92,17 +68,4 @@ internal sealed class RawValue
 
     private static string FormatString(string s) =>
         s.Contains('"') ? $"\"{s.Replace("\"", "")}\"" : $"\"{s}\"";
-
-    internal T Get<T>()
-    {
-        object boxed = Type switch
-        {
-            ValueType.Expression or ValueType.String => _string!,
-            ValueType.Float => _numeric.Float,
-            ValueType.Int => _numeric.Int,
-            ValueType.Int64 => _numeric.Int64,
-            _ => _array!
-        };
-        return (T)Convert.ChangeType(boxed, typeof(T));
-    }
 }
