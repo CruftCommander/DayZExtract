@@ -1,6 +1,6 @@
-﻿namespace KuruExtract.RV.PBO;
+namespace KuruExtract.RV.PBO;
 
-internal sealed class PBOFileExisting : IPBOFileEntry
+internal sealed class PBOFileExisting
 {
     private readonly FileEntry _fileEntry;
     private readonly PBO _pbo;
@@ -18,15 +18,7 @@ internal sealed class PBOFileExisting : IPBOFileEntry
 
     public bool IsParamFile { get; }
 
-    public int TimeStamp => _fileEntry.TimeStamp;
-
-    public int Size => _fileEntry.IsCompressed ? _fileEntry.UncompressedSize : _fileEntry.DataSize;
-
-    public bool IsCompressed => _fileEntry.IsCompressed;
-
     public int DiskSize => _fileEntry.DataSize;
-
-    public string PboFile => _pbo.PBOFilePath;
 
     public Stream OpenRead() => _pbo.GetFileEntryStream(_fileEntry);
 

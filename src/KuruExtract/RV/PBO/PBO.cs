@@ -26,7 +26,7 @@ internal sealed class PBO : IDisposable
         }
     }
 
-    public List<IPBOFileEntry> Files { get; } = [];
+    public List<PBOFileExisting> Files { get; } = [];
     public List<KeyValuePair<string, string>> PropertiesPairs { get; } = [];
     public int DataOffset { get; private set; }
     public string? Prefix { get; private set; }
@@ -34,17 +34,14 @@ internal sealed class PBO : IDisposable
     public bool IsOfficial { get; init; }
     public bool IsObfuscated { get; private set; }
 
-    public PBO(string fileName, bool keepStreamOpen = false)
+    public PBO(string fileName)
     {
         PBOFilePath = fileName;
         var input = new RVBinaryReader(PBOFileStream);
         ReadHeader(input);
-        if (!keepStreamOpen)
-        {
-            _pboFileStream?.Dispose();
-            _pboFileStream = null;
-            _reader = null;
-        }
+        _pboFileStream?.Dispose();
+        _pboFileStream = null;
+        _reader = null;
     }
 
     private void ReadHeader(RVBinaryReader input)
@@ -159,7 +156,7 @@ internal sealed class PBO : IDisposable
         }
     }
 
-    public static void ExtractFile(IPBOFileEntry entry, string target, string? injectSubDir = null)
+    public static void ExtractFile(PBOFileExisting entry, string target, string? injectSubDir = null)
     {
         string fileName = entry.FileName;
         bool isParamFile = entry.IsParamFile;
@@ -189,9 +186,24 @@ internal sealed class PBO : IDisposable
         if (isParamFile)
         {
             using var source = entry.OpenRead();
-            var param = new ParamFile(source);
-            using var writer = new StreamWriter(targetFile);
-            writer.Write(param.ToString());
+
+            // some mods ship plaintext config.bin / .rvmat that aren't rapified;
+            // detect the "\0raP" magic and copy those through untouched
+            ReadOnlySpan<byte> sig = [0x00, 0x72, 0x61, 0x50];
+            Span<byte> magic = stackalloc byte[4];
+            int read = source.ReadAtLeast(magic, magic.Length, throwOnEndOfStream: false);
+            source.Position = 0;
+
+            if (read == 4 && magic.SequenceEqual(sig))
+            {
+                var param = new ParamFile(source);
+                using var writer = new StreamWriter(targetFile);
+                writer.Write(param.ToString());
+            }
+            else
+            {
+                source.CopyTo(targetFile);
+            }
             return;
         }
 
