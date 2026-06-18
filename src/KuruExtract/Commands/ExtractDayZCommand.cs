@@ -615,7 +615,7 @@ internal static class ExtractDayZCommand
         if (extStats.Count == 0) return;
 
         var chart = new BreakdownChart()
-            .Width(Math.Min(Console.WindowWidth - 2, 80))
+            .Width(Math.Min(AnsiConsole.Profile.Width - 2, 80))
             .UseValueFormatter((value, _) => FormatBytes(value));
 
         foreach (var (ext, (_, bytes)) in extStats.OrderByDescending(x => x.Value.Bytes))
