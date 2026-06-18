@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "KuruExtract": {
+      "commandName": "Project",
+      "commandLineArgs": "P:\\ -m P:\\Mods\\@Elevator"
+    }
+  }
+}

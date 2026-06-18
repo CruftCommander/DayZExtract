@@ -25,13 +25,9 @@ public class Program
         var originalArgs = args;
         if (args.Length < 1)
         {
-#if DEBUG
-            args = [@"P:\", "-m", "@CF", "-i", "*.cpp,*.c"];
-#else
             args = OperatingSystem.IsWindows() 
                 ? (Directory.Exists(@"P:\") ? [@"P:\"] : []) // check if P:\ exist first
                 : ["--help"]; // other OS
-#endif
         }
 
         if (args is not ["--version"])
