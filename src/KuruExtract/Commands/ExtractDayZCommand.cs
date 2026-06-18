@@ -496,8 +496,7 @@ internal static class ExtractDayZCommand
         try
         {
             using var stream = File.OpenRead(bisignPath);
-            var sign = BiSign.Read(stream);
-            return sign.PublicKey.Matches(expectedKey);
+            return BiPublicKey.Read(stream).Matches(expectedKey);
         }
         catch { return false; }
     }
