@@ -13,7 +13,6 @@ internal readonly record struct FileEntry(
 {
     public static readonly int VersionMagic    = BitConverter.ToInt32(Encoding.ASCII.GetBytes("sreV"), 0); // Vers
     public static readonly int CompressionMagic = BitConverter.ToInt32(Encoding.ASCII.GetBytes("srpC"), 0); // Cprs
-    public static readonly int EncryptionMagic  = BitConverter.ToInt32(Encoding.ASCII.GetBytes("rcnE"), 0); // Encr
 
     // the stored offset field is discarded - we compute startOffset from the running data position
     public static FileEntry Read(RVBinaryReader input, int startOffset)
